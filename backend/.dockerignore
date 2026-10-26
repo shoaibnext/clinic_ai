@@ -1,0 +1,18 @@
+# Keep the image small and avoid leaking local state.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+.env
+*.db
+*.sqlite3
+clinicai.db
+alembic_smoke.db
+tests/
+.git/
+.gitignore
+Dockerfile
+.dockerignore

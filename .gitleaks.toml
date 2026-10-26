@@ -1,0 +1,47 @@
+# Gitleaks configuration for Clinic AI Receptionist.
+# Run locally with:  gitleaks detect --source . -v
+# The defaults already cover common providers (AWS, GitHub, OpenAI, etc.).
+# This file adds project-specific patterns and safety rails.
+
+title = "Clinic AI Receptionist gitleaks config"
+
+[extend]
+useDefault = true
+
+# Project-specific secret patterns
+[[rules]]
+id = "clinic-whatsapp-token"
+description = "WhatsApp / Meta Cloud API access token"
+regex = '''(?i)(WHATSAPP_ACCESS_TOKEN|WHATSAPP_APP_SECRET)\s*=\s*["']?[A-Za-z0-9._\-]{12,}'''
+secretGroup = 1
+entropy = 3.0
+
+[[rules]]
+id = "clinic-webhook-verify-token"
+description = "WhatsApp webhook verify token (wv_*)"
+regex = '''wv_[A-Za-z0-9]{20,}'''
+entropy = 3.0
+
+[[rules]]
+id = "clinic-llm-key"
+description = "LLM provider API key assignment"
+regex = '''(?i)(GROQ_API_KEY|OPENAI_API_KEY|AZURE_OPENAI_API_KEY|OPENROUTER_API_KEY)\s*=\s*["']?[A-Za-z0-9._\-]{12,}'''
+secretGroup = 1
+entropy = 3.0
+
+# Never flag our own example files
+[allowlist]
+description = "Placeholders, docs, and test fixtures"
+paths = [
+  '''\.env\.example$''',
+  '''backend/tests/''',
+  '''docs/''',
+  '''README\.md$''',
+]
+regexes = [
+  '''change-this-in-development''',
+  '''your-api-key''',
+  '''your-verify-token''',
+  '''<your-key>''',
+  '''sk-o[A-Za-z0-9]*test''',
+]

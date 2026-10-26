@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: clinicai-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: clinicai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: clinicai-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Override the SQLite default in backend/.env with the compose Postgres.
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/clinicai
+      APP_ENV: production
+    env_file:
+      # GROQ_API_KEY / WHATSAPP_* / SECRET_KEY etc. come from the backend .env.
+      - ../backend/.env
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: clinicai-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
